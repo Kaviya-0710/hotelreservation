@@ -1,0 +1,165 @@
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Scanner;
+
+class Room {
+    int roomNumber;
+    String category;
+    double price;
+    String amenities;
+
+    public Room(int roomNumber, String category, double price, String amenities) {
+        this.roomNumber = roomNumber;
+        this.category = category;
+        this.price = price;
+        this.amenities = amenities;
+    }
+
+    @Override
+    public String toString() {
+        return "Available Room: " + roomNumber + " (" + price + ") - " + amenities;
+    }
+}
+
+class Reservation {
+    String name;
+    Room room;
+    Date startDate;
+    Date endDate;
+
+    public Reservation(String name, Room room, Date startDate, Date endDate) {
+        this.name = name;
+        this.room = room;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
+    @Override
+    public String toString() {
+        return "Reservation for " + name + " in Room " + room.roomNumber + " from " + startDate + " to " + endDate;
+    }
+}
+
+public class Main {
+
+    static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    static List<Room> rooms = new ArrayList<>();
+    static List<Reservation> reservations = new ArrayList<>();
+
+    public static void main(String[] args) throws ParseException {
+        // Sample rooms
+        rooms.add(new Room(101, "Standard", 100, "1 Queen bed, Free Wi-Fi"));
+        rooms.add(new Room(102, "Deluxe", 150, "1 King bed, Free Wi-Fi, Breakfast included"));
+        rooms.add(new Room(203, "Suite", 250, "2 King beds, Free Wi-Fi, Sea view, Jacuzzi"));
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter your name: ");
+        String name = scanner.nextLine();
+
+        while (true) {
+            System.out.println("\n1. Search available rooms");
+            System.out.println("2. Make a reservation");
+            System.out.println("3. View my reservations");
+            System.out.println("4. Cancel a reservation");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+            int option = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (option) {
+                case 1:
+                    searchRooms(scanner);
+                    break;
+                case 2:
+                    makeReservation(scanner, name);
+                    break;
+                case 3:
+                    viewReservations(name);
+                    break;
+                case 4:
+                    cancelReservation(scanner, name);
+                    break;
+                case 5:
+                    System.out.println("Thank you for using the Hotel Reservation System. Goodbye!");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+    }
+
+    private static void searchRooms(Scanner scanner) throws ParseException {
+        System.out.print("Enter room category (Standard, Deluxe, Suite): ");
+        String category = scanner.nextLine();
+        System.out.print("Enter start date (yyyy-MM-dd): ");
+        Date startDate = dateFormat.parse(scanner.nextLine());
+        System.out.print("Enter end date (yyyy-MM-dd): ");
+        Date endDate = dateFormat.parse(scanner.nextLine());
+
+        System.out.println("\nAvailable rooms:");
+        for (Room room : rooms) {
+            if (room.category.equalsIgnoreCase(category)) {
+                System.out.println(room);
+            }
+        }
+    }
+
+    private static void makeReservation(Scanner scanner, String name) throws ParseException {
+        System.out.print("Enter room number to reserve: ");
+        int roomNumber = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        Room selectedRoom = null;
+        for (Room room : rooms) {
+            if (room.roomNumber == roomNumber) {
+                selectedRoom = room;
+                break;
+            }
+        }
+
+        if (selectedRoom != null) {
+            System.out.print("Enter start date (yyyy-MM-dd): ");
+            Date startDate = dateFormat.parse(scanner.nextLine());
+            System.out.print("Enter end date (yyyy-MM-dd): ");
+            Date endDate = dateFormat.parse(scanner.nextLine());
+
+            reservations.add(new Reservation(name, selectedRoom, startDate, endDate));
+            System.out.println("Reservation made successfully!");
+        } else {
+            System.out.println("Invalid room number. Please try again.");
+        }
+    }
+
+    private static void viewReservations(String name) {
+        System.out.println("\nYour reservations:");
+        for (Reservation reservation : reservations) {
+            if (reservation.name.equals(name)) {
+                System.out.println(reservation);
+            }
+        }
+    }
+
+    private static void cancelReservation(Scanner scanner, String name) {
+        System.out.println("\nYour reservations:");
+        for (int i = 0; i < reservations.size(); i++) {
+            if (reservations.get(i).name.equals(name)) {
+                System.out.println((i + 1) + ". " + reservations.get(i));
+            }
+        }
+
+        System.out.print("Enter the number of the reservation to cancel: ");
+        int index = scanner.nextInt() - 1;
+
+        if (index >= 0 && index < reservations.size() && reservations.get(index).name.equals(name)) {
+            reservations.remove(index);
+            System.out.println("Reservation cancelled successfully!");
+        } else {
+            System.out.println("Invalid option.");
+        }
+    }
+}
